@@ -3,4 +3,4 @@
   roles:
 
     - { role: docker }
-    - { role: canarytokens, canary_nxdomains: '', canary_domains: '', canary_public_domain: '', canary_ip: '', mg_api_key: '', mg_domain_name: '', google_api_key: '' }
+    - { role: canarytokens, canary_nxdomains: '', canary_domains: '', canary_public_domain: '', canary_ip: '', mg_api_key: '', mg_domain_name: '', google_api_key: '', cert_country: '', cert_state: '', cert_city: '', cert_org: '' }
