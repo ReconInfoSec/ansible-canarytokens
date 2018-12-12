@@ -1,0 +1,6 @@
+- name: Deploy canarytokens
+  hosts: canary
+  roles:
+
+    - { role: docker }
+    - { role: canarytokens, canary_nx_domains: '', canary_domains: '', canary_public_domain: '', canary_ip: '', mg_api_key: '', mg_domain_name: '', google_api_key: '' }

@@ -1,0 +1,79 @@
+---
+# tasks file for roles/canarytokens
+
+- name: Install prereqs
+  apt:
+    name: "{{ item }}"
+    state: latest
+    update_cache: yes
+  with_items:
+    - python-pip
+    - python-dev
+    - python3-pip
+    - python3-dev
+    - libyaml-dev
+
+- name: Install pip prereqs
+  pip:
+    name: "{{ item }}"
+  with_items:
+    - docker
+    - docker-compose
+
+- name: Clone canarytokens repository
+  git:
+    repo: "https://github.com/thinkst/canarytokens-docker"
+    dest: "/opt/canarytokens"
+    recursive: yes
+    force: yes
+    update: no
+    accept_hostkey: yes
+
+- name: Copy env files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - {src: 'templates/frontend.env',dest: '/opt/canarytokens/frontend.env'}
+    - {src: 'templates/switchboard.env',dest: '/opt/canarytokens/switchboard.env'}
+
+- name: Copy docker-compose.yml
+  template:
+    src: templates/docker-compose.yml
+    dest: /opt/canarytokens/docker-compose.yml
+
+- name: Generate DH key
+  stat:
+    path: /etc/nginx/ssl/dhparam.pem
+  register: stat_dhparam
+- shell: openssl dhparam -out /opt/canarytokens/nginx/dhparam.pem 2048
+  when: stat_dhparam.stat.exists == False
+- shell: openssl req -new -nodes -x509 -days 3650 -subj "/C=US/ST=TX/L=Austin/O=Recon InfoSec/CN=canarytokens" -keyout /opt/canarytokens/nginx/canary.key -out /opt/canarytokens/nginx/canary.crt
+
+- name: Copy nginx.conf
+  template:
+    src: templates/nginx.conf
+    dest: /opt/canarytokens/nginx/nginx.conf
+
+- name: Copy modified scripts for webhook use
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - {src: 'templates/channel.py',dest: '/opt/canarytokens/canarytokens/channel.py'}
+    - {src: 'templates/queries.py',dest: '/opt/canarytokens/canarytokens/queries.py'}
+    - {src: 'templates/channel_output_webhook.py',dest: '/opt/canarytokens/canarytokens/channel_output_webhook.py'}
+
+- name: Copy Dockerfile
+  copy:
+    src: files/Dockerfile-nginx
+    dest: /opt/canarytokens/nginx/Dockerfile
+
+- name: Copy Dockerfile
+  copy:
+    src: files/Dockerfile-canarytokens
+    dest: /opt/canarytokens/canarytokens/Dockerfile
+
+- name: Start canarytokens
+  docker_service:
+    project_src: /opt/canarytokens
