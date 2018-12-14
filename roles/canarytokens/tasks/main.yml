@@ -55,15 +55,6 @@
     src: templates/nginx.conf
     dest: /opt/canarytokens/nginx/nginx.conf
 
-- name: Copy modified scripts for webhook use
-  template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-  with_items:
-    - {src: 'templates/channel.py',dest: '/opt/canarytokens/canarytokens/channel.py'}
-    - {src: 'templates/queries.py',dest: '/opt/canarytokens/canarytokens/queries.py'}
-    - {src: 'templates/channel_output_webhook.py',dest: '/opt/canarytokens/canarytokens/channel_output_webhook.py'}
-
 - name: Copy Dockerfile
   copy:
     src: files/Dockerfile-nginx
