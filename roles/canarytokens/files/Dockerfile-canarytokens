@@ -32,10 +32,6 @@ RUN pip install --no-cache-dir service_identity
 
 RUN git clone https://github.com/thinkst/canarytokens /canarytokens-master
 
-COPY queries.py /canarytokens-master/queries.py
-COPY channel_output_webhook.py /canarytokens-master/channel_output_webhook.py
-COPY channel.py /canarytokens-master/channel.py
-
 RUN mv /canarytokens-master/* /srv
 RUN rm -rf /canarytokens-master
 
